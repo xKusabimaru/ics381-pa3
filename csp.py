@@ -198,3 +198,23 @@ class SudokuCSP:
                     return False
         
         return True
+    
+def visualize_sudoku_solution(assignment_solution, file_name):
+    sudoku_array = [[0, 0, 0, 0, 0, 0, 0, 0, 0], 
+                    [0, 0, 0, 0, 0, 0, 0, 0, 0], 
+                    [0, 0, 0, 0, 0, 0, 0, 0, 0], 
+                    [0, 0, 0, 0, 0, 0, 0, 0, 0], 
+                    [0, 0, 0, 0, 0, 0, 0, 0, 0], 
+                    [0, 0, 0, 0, 0, 0, 0, 0, 0], 
+                    [0, 0, 0, 0, 0, 0, 0, 0, 0], 
+                    [0, 0, 0, 0, 0, 0, 0, 0, 0], 
+                    [0, 0, 0, 0, 0, 0, 0, 0, 0]]
+    
+    for assignment in assignment_solution:
+        sudoku_array[assignment[0] - 1][assignment[1] - 1] = assignment_solution[assignment]
+
+    plt.figure(figsize=(9, 9))
+    ax = sns.heatmap(data=sudoku_array, annot=True, linewidths=1.5, linecolor='k', cbar=False)
+    ax.invert_yaxis()
+    plt.savefig(file_name, format="png")
+    plt.close()
