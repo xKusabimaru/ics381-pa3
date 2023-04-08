@@ -1,4 +1,6 @@
 from copy import deepcopy
+import matplotlib.pyplot as plt
+import seaborn as sns
 
 def ac3(csp, arcs_queue=None, current_domains=None, assignment=None):
     if arcs_queue is None:
@@ -105,3 +107,94 @@ def select_unassigned_variable(unassigned_variables, current_domains):
             picked_variable = d
     
     return picked_variable
+
+class SudokuCSP:
+
+    def __init__(self, partial_assignment={}):
+        self.variables = []
+        for row in range(1, 10):
+            for col in range(1, 10):
+                self.variables.append((row, col))
+
+        self.domains = dict()
+        for var in self.variables:
+            if var in partial_assignment:
+                self.domains[var] = [partial_assignment[var]]
+            else:
+                self.domains[var] = [1, 2, 3, 4, 5, 6, 7, 8, 9]
+
+        self.adjacency = dict()
+
+        for var in self.variables:
+            self.adjacency[var] = []
+
+        for var in self.variables:
+            for i in range(1, 10):
+                if i != var[1]:
+                    self.adjacency[var].append((var[0], i))
+
+            for i in range(1, 10):
+                if i != var[0]:
+                    self.adjacency[var].append((i, var[1]))
+
+            row_start, row_end, col_start, col_end = 0, 0, 0, 0 #just initialization
+
+            if var[0] <= 3:
+                row_start, row_end = 1, 4
+            elif var[0] <= 6:
+                row_start, row_end = 4, 7
+            else:
+                row_start, row_end = 7, 10
+
+            if var[1] <= 3:
+                col_start, col_end = 1, 4
+            elif var[1] <= 6:
+                col_start, col_end = 4, 7
+            else:
+                col_start, col_end = 7, 10
+                
+            for i in range(row_start, row_end):
+                for j in range(col_start, col_end):
+                    if (i, j) not in self.adjacency[var] and (i, j) != var:
+                        self.adjacency[var].append((i, j))
+        
+    def constraint_consistent(self, var1, val1, var2, val2):
+        if var1 not in self.adjacency[var2]:
+            return True
+        
+        if val1 != val2:
+            return True
+        
+        return False
+    
+    def check_partial_assignment(self, assignment):
+        if assignment is None:
+            return False
+        
+        for elm in assignment:
+
+            assigned_neighbors = []
+            for adjacency in self.adjacency[elm]:
+                if adjacency in assignment:
+                    assigned_neighbors.append(adjacency)
+
+            for adjacency in assigned_neighbors:
+                if not self.constraint_consistent(elm, assignment[elm], adjacency, assignment[adjacency]):
+                    return False
+        
+        return True
+    
+    def is_goal(self, assignment):
+        if assignment is None:
+            return False
+        
+        for var in self.variables:
+            if var not in assignment:
+                return False
+            
+        for elm in assignment:
+            for adjacency in self.adjacency[elm]:
+                if not self.constraint_consistent(elm, assignment[elm], adjacency, assignment[adjacency]):
+                    return False
+        
+        return True
